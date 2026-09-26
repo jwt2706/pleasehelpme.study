@@ -5,6 +5,9 @@ import PersonaStep from "./components/PersonaStep.jsx";
 import ConversationStep from "./components/ConversationStep.jsx";
 import ReportStep from "./components/ReportStep.jsx";
 import HistoryStep from "./components/HistoryStep.jsx";
+import RoleStep from "./components/RoleStep.jsx";
+import AccessStep from "./components/AccessStep.jsx";
+import GuardianDashboard from "./components/GuardianDashboard.jsx";
 import { api } from "./api.js";
 
 export default function App() {
@@ -17,11 +20,12 @@ export default function App() {
     user,
   } = useAuth0();
 
-  const [step, setStep] = useState("topic"); // topic | persona | conversation | report | history
+  const [step, setStep] = useState("topic"); // topic | persona | conversation | report | history | access
   const [topic, setTopic] = useState("");
   const [persona, setPersona] = useState(null);
   const [report, setReport] = useState(null);
   const [streak, setStreak] = useState(null);
+  const [account, setAccount] = useState(null); // { sub, email, role, roleSelected }
 
   const getToken = useCallback(() => getAccessTokenSilently(), [getAccessTokenSilently]);
 
@@ -30,10 +34,14 @@ export default function App() {
     (async () => {
       try {
         const token = await getToken();
-        const data = await api.getPersonas(token);
-        setStreak(data.streak);
+        const acct = await api.getAccount(token);
+        setAccount(acct);
+        if (acct.role === "student") {
+          const data = await api.getPersonas(token);
+          setStreak(data.streak);
+        }
       } catch {
-        // Non-fatal — streak just won't show until a session completes.
+        // Non-fatal — account/streak just won't show yet.
       }
     })();
   }, [isAuthenticated, getToken]);
@@ -54,12 +62,19 @@ export default function App() {
         <span className="wordmark">Please help me study!</span>
         {isLoading ? null : isAuthenticated ? (
           <div className="account">
-            <button
-              className="auth-action"
-              onClick={() => (onHistory ? restart() : setStep("history"))}
-            >
-              {onHistory ? "New session" : "History"}
-            </button>
+            {account?.role === "student" && (
+              <>
+                <button
+                  className="auth-action"
+                  onClick={() => (onHistory ? restart() : setStep("history"))}
+                >
+                  {onHistory ? "New session" : "History"}
+                </button>
+                <button className="auth-action" onClick={() => setStep("access")}>
+                  Access
+                </button>
+              </>
+            )}
             <span className="avatar" title={user?.name || user?.email}>
               {user?.picture ? <img src={user.picture} alt="" /> : initial}
             </span>
@@ -92,45 +107,63 @@ export default function App() {
         </section>
       ) : (
         <>
-          {step === "topic" && (
-            <TopicStep
-              onContinue={(t) => {
-                setTopic(t);
-                setStep("persona");
+          {!account ? null : !account.roleSelected ? (
+            <RoleStep
+              onSelect={async (role) => {
+                const token = await getToken();
+                await api.setRole(token, role);
+                setAccount((a) => ({ ...a, role, roleSelected: true }));
               }}
             />
-          )}
+          ) : account.role !== "student" ? (
+            <GuardianDashboard getToken={getToken} />
+          ) : (
+            <>
+              {step === "topic" && (
+                <TopicStep
+                  onContinue={(t) => {
+                    setTopic(t);
+                    setStep("persona");
+                  }}
+                />
+              )}
 
-          {step === "persona" && (
-            <PersonaStep
-              topic={topic}
-              onSelect={(p) => {
-                setPersona(p);
-                setStep("conversation");
-              }}
-              onBack={() => setStep("topic")}
-            />
-          )}
+              {step === "persona" && (
+                <PersonaStep
+                  topic={topic}
+                  onSelect={(p) => {
+                    setPersona(p);
+                    setStep("conversation");
+                  }}
+                  onBack={() => setStep("topic")}
+                />
+              )}
 
-          {step === "conversation" && (
-            <ConversationStep
-              topic={topic}
-              persona={persona}
-              getToken={getToken}
-              onFinish={(result) => {
-                setReport(result);
-                setStreak(result.streak);
-                setStep("report");
-              }}
-              onBack={() => setStep("persona")}
-            />
-          )}
+              {step === "conversation" && (
+                <ConversationStep
+                  topic={topic}
+                  persona={persona}
+                  getToken={getToken}
+                  onFinish={(result) => {
+                    setReport(result);
+                    setStreak(result.streak);
+                    setStep("report");
+                  }}
+                  onBack={() => setStep("persona")}
+                />
+              )}
 
-          {step === "report" && (
-            <ReportStep topic={topic} report={report} streak={streak} onRestart={restart} />
-          )}
+              {step === "report" && (
+                <ReportStep topic={topic} report={report} streak={streak} onRestart={restart} />
+              )}
 
-          {step === "history" && <HistoryStep getToken={getToken} onStartNew={restart} />}
+              {step === "history" && <HistoryStep getToken={getToken} onStartNew={restart} />}
+
+              {step === "access" && (
+                <AccessStep getToken={getToken} onBack={() => setStep("topic")} />
+              )}
+            </>
+          )}
         </>
       )}
     </div>

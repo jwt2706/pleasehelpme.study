@@ -18,10 +18,19 @@ async function request(path, { token, method = "GET", body } = {}) {
 }
 
 export const api = {
+  getAccount: (token) => request("/api/account", { token }),
+  setRole: (token, role) => request("/api/account/role", { token, method: "POST", body: { role } }),
   getPersonas: (token) => request("/api/personas", { token }),
-  postTurn: (token, payload) =>
-    request("/api/session/turn", { token, method: "POST", body: payload }),
+  postTurn: (token, payload) => request("/api/session/turn", { token, method: "POST", body: payload }),
   completeSession: (token, payload) =>
     request("/api/session/complete", { token, method: "POST", body: payload }),
   getHistory: (token) => request("/api/history", { token }),
+  getStudentHistory: (token, studentSub) =>
+    request(`/api/history/student/${studentSub}`, { token }),
+  generateLinkCode: (token) => request("/api/link/code", { token, method: "POST" }),
+  redeemLinkCode: (token, code) =>
+    request("/api/link/redeem", { token, method: "POST", body: { code } }),
+  getLinkedStudents: (token) => request("/api/link/students", { token }),
+  getGuardians: (token) => request("/api/link/guardians", { token }),
+  removeLink: (token, otherSub) => request(`/api/link/${otherSub}`, { token, method: "DELETE" }),
 };

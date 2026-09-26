@@ -38,13 +38,15 @@ export default function HistoryStep({ getToken, onStartNew }) {
     (async () => {
       try {
         const token = await getToken();
-        const result = await api.getHistory(token);
+        const result = studentSub
+          ? await api.getStudentHistory(token, studentSub)
+          : await api.getHistory(token);
         setData(result);
       } catch (err) {
         setError(err.message);
       }
     })();
-  }, [getToken]);
+  }, [getToken, studentSub]);
 
   if (error) {
     return (
