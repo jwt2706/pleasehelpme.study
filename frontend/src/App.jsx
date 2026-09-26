@@ -49,7 +49,7 @@ export default function App() {
   return (
     <div className="app-shell">
       <header className="masthead">
-        <span className="wordmark">say it back</span>
+        <span className="wordmark">Please help me study!</span>
         {isLoading ? null : isAuthenticated ? (
           <button className="auth-action" onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}>
             Log out
