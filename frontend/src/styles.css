@@ -230,27 +230,8 @@ input::placeholder {
   margin-top: 1.5rem;
 }
 
-.persona-row {
-  display: flex;
-  align-items: flex-start;
-  gap: 1rem;
-  width: 100%;
-  text-align: left;
-  background: none;
-  border: none;
-  border-bottom: 1px solid var(--line);
-  padding: 1.1rem 0.25rem;
-  cursor: pointer;
-  font-family: var(--sans);
-  color: var(--ink);
-}
-
 .persona-row:hover:not(:disabled) {
   background: var(--paper-raised);
-}
-
-.persona-row:disabled {
-  cursor: default;
 }
 
 .persona-mark {
