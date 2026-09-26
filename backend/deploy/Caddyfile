@@ -1,0 +1,7 @@
+# Caddy automatically gets + renews an HTTPS cert for this domain,
+# as long as api.pleasehelpme.study's DNS A record points at this
+# server's IP and ports 80/443 are open in the Vultr firewall.
+
+api.pleasehelpme.study {
+    reverse_proxy localhost:3000
+}
