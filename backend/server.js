@@ -5,6 +5,7 @@ const { checkJwt } = require("./middleware/auth");
 
 const personasRouter = require("./routes/personas");
 const sessionRouter = require("./routes/session");
+const historyRouter = require("./routes/history");
 
 const app = express();
 
@@ -20,16 +21,14 @@ app.use(
 );
 app.use(express.json({ limit: "2mb" }));
 
-// Public health check — used to verify the Vultr deploy is actually live
 app.get("/health", (req, res) => {
   res.json({ ok: true, service: "say-it-back-api", time: new Date().toISOString() });
 });
 
-// Everything below requires a valid Auth0 JWT
 app.use("/api/personas", checkJwt, personasRouter);
 app.use("/api/session", checkJwt, sessionRouter);
+app.use("/api/history", checkJwt, historyRouter);
 
-// Auth error handler (bad/missing token → clean 401 instead of a stack trace)
 app.use((err, req, res, next) => {
   if (err.name === "UnauthorizedError") {
     return res.status(401).json({ error: "Invalid or missing token" });

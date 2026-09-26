@@ -59,4 +59,24 @@ function completeSession({ sub, topic, personaId, transcript, gapReport }) {
   return getUser(sub);
 }
 
-module.exports = { db, upsertUser, getUser, completeSession };
+function getSessionHistory(sub) {
+  const rows = db
+    .prepare(
+      `SELECT id, topic, persona_id, transcript, gap_report, created_at
+       FROM sessions
+       WHERE auth0_sub = ?
+       ORDER BY created_at DESC`
+    )
+    .all(sub);
+
+  return rows.map((row) => ({
+    id: row.id,
+    topic: row.topic,
+    personaId: row.persona_id,
+    createdAt: row.created_at,
+    transcript: JSON.parse(row.transcript),
+    gapReport: row.gap_report ? JSON.parse(row.gap_report) : null,
+  }));
+}
+
+module.exports = { db, upsertUser, getUser, completeSession, getSessionHistory };

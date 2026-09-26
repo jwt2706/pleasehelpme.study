@@ -23,4 +23,5 @@ export const api = {
     request("/api/session/turn", { token, method: "POST", body: payload }),
   completeSession: (token, payload) =>
     request("/api/session/complete", { token, method: "POST", body: payload }),
+  getHistory: (token) => request("/api/history", { token }),
 };
