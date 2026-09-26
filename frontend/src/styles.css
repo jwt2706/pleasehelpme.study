@@ -7,10 +7,9 @@
   --accent: #3f5d52;
   --accent-soft: #dde5de;
 
-  --raccoon: #8b6f47;
-  --knight: #55677a;
-  --kid: #a85c3f;
-  --philosopher: #6f5f82;
+  --persona-light: #8b6f47;
+  --persona-working: #55677a;
+  --persona-deep: #6f5f82;
 
   --serif: "Newsreader", Georgia, serif;
   --sans: "Public Sans", system-ui, sans-serif;

@@ -1,28 +1,21 @@
 export const PERSONAS = [
   {
-    id: "raccoon",
-    name: "Confused raccoon",
-    description: "Gets distracted by small details and asks what things mean.",
-    color: "var(--raccoon)",
+    id: "light",
+    name: "Light comprehension",
+    description: "Just wants the gist, in plain language — no jargon allowed.",
+    color: "var(--persona-light)",
   },
   {
-    id: "knight",
-    name: "Skeptical knight",
-    description: "Trusts nothing modern. Wants proof, or at least an analogy.",
-    color: "var(--knight)",
+    id: "working",
+    name: "Working knowledge",
+    description: "Knows the basics. Pushes on the mechanism and the reasoning.",
+    color: "var(--persona-working)",
   },
   {
-    id: "kid",
-    name: "Curious five-year-old",
-    description: "Asks \"but why\" until you run out of simple words.",
-    color: "var(--kid)",
-  },
-  {
-    id: "philosopher",
-    name: "Philosophy major",
-    description: "Wanders off and asks what the thing really is, underneath.",
-    color: "var(--philosopher)",
-    unlockNote: "Unlocks after 3 sessions",
+    id: "deep",
+    name: "Deep understanding",
+    description: "Wants first principles. Pushes on edge cases and assumptions.",
+    color: "var(--persona-deep)",
   },
 ];
 

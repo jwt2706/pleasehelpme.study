@@ -13,13 +13,13 @@ export default function App() {
     loginWithRedirect,
     logout,
     getAccessTokenSilently,
+    user,
   } = useAuth0();
 
   const [step, setStep] = useState("topic"); // topic | persona | conversation | report
   const [topic, setTopic] = useState("");
   const [persona, setPersona] = useState(null);
   const [report, setReport] = useState(null);
-  const [unlockedIds, setUnlockedIds] = useState(null);
   const [streak, setStreak] = useState(null);
 
   const getToken = useCallback(() => getAccessTokenSilently(), [getAccessTokenSilently]);
@@ -30,11 +30,9 @@ export default function App() {
       try {
         const token = await getToken();
         const data = await api.getPersonas(token);
-        setUnlockedIds(data.personas.filter((p) => !p.locked).map((p) => p.id));
         setStreak(data.streak);
       } catch {
-        // Non-fatal: fall back to showing all personas unlocked.
-        setUnlockedIds(null);
+        // Non-fatal — streak just won't show until a session completes.
       }
     })();
   }, [isAuthenticated, getToken]);
@@ -46,14 +44,24 @@ export default function App() {
     setStep("topic");
   }
 
+  const initial = (user?.name || user?.email || "?").trim().charAt(0).toUpperCase();
+
   return (
     <div className="app-shell">
       <header className="masthead">
         <span className="wordmark">Please help me study!</span>
         {isLoading ? null : isAuthenticated ? (
-          <button className="auth-action" onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}>
-            Log out
-          </button>
+          <div className="account">
+            <span className="avatar" title={user?.name || user?.email}>
+              {user?.picture ? <img src={user.picture} alt="" /> : initial}
+            </span>
+            <button
+              className="auth-action"
+              onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}
+            >
+              Log out
+            </button>
+          </div>
         ) : (
           <button className="auth-action" onClick={() => loginWithRedirect()}>
             Log in
@@ -65,8 +73,8 @@ export default function App() {
         <section>
           <h1>Find out what you don't actually know.</h1>
           <p className="lede">
-            Explain a topic to a skeptical little persona. The follow-up
-            question it asks is exactly the thing you glossed over.
+            Explain a topic to a listener at the depth you choose. The
+            follow-up question it asks is exactly the thing you glossed over.
           </p>
           <div className="actions">
             <button className="btn btn-primary" onClick={() => loginWithRedirect()}>
@@ -88,7 +96,6 @@ export default function App() {
           {step === "persona" && (
             <PersonaStep
               topic={topic}
-              unlockedIds={unlockedIds}
               onSelect={(p) => {
                 setPersona(p);
                 setStep("conversation");

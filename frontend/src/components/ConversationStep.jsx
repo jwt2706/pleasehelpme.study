@@ -75,8 +75,8 @@ export default function ConversationStep({
     <section>
       <h1>Go on, explain it.</h1>
       <p className="lede">
-        {persona.name} is listening. Answer plainly — the follow-up question
-        will find the soft spot.
+        Answering at the <strong>{persona.name}</strong> level. Answer plainly
+        — the follow-up question will find the soft spot.
       </p>
 
       <div className="conversation">
@@ -104,7 +104,7 @@ export default function ConversationStep({
             </div>
           </div>
         ))}
-        {busy && <p className="thinking">{persona.name} is thinking it over…</p>}
+        {busy && <p className="thinking">Thinking it over…</p>}
       </div>
 
       {!reachedMax && (

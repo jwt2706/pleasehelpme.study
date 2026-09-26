@@ -43,7 +43,7 @@ export default function TopicStep({ onContinue }) {
 
         <div className="actions">
           <button type="submit" className="btn btn-primary" disabled={!topic.trim()}>
-            Choose who's listening
+            Choose depth
           </button>
         </div>
       </form>
