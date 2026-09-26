@@ -1,7 +1,11 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
-const { checkJwt } = require("./middleware/auth");
+
+const accountRouter = require("./routes/account");
+const linkRouter = require("./routes/link");
+const { checkJwt, attachUser } = require("./middleware/auth");
+
 
 const personasRouter = require("./routes/personas");
 const sessionRouter = require("./routes/session");
@@ -25,9 +29,11 @@ app.get("/health", (req, res) => {
   res.json({ ok: true, service: "say-it-back-api", time: new Date().toISOString() });
 });
 
-app.use("/api/personas", checkJwt, personasRouter);
-app.use("/api/session", checkJwt, sessionRouter);
-app.use("/api/history", checkJwt, historyRouter);
+app.use("/api/account", checkJwt, attachUser, accountRouter);
+app.use("/api/personas", checkJwt, attachUser, personasRouter);
+app.use("/api/session", checkJwt, attachUser, sessionRouter);
+app.use("/api/history", checkJwt, attachUser, historyRouter);
+app.use("/api/link", checkJwt, attachUser, linkRouter);
 
 app.use((err, req, res, next) => {
   if (err.name === "UnauthorizedError") {

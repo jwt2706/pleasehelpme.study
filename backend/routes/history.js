@@ -1,12 +1,10 @@
 const express = require("express");
-const { getSessionHistory } = require("../services/db");
+const { getSessionHistory, isLinked } = require("../services/db");
 const { getPersonaById } = require("../config/personas");
 
 const router = express.Router();
 
-// GET /api/history — every past session for this user, plus aggregate stats
-router.get("/", (req, res) => {
-  const sub = req.auth.payload.sub;
+function buildHistoryPayload(sub) {
   const sessions = getSessionHistory(sub);
 
   const byPersonaCount = {};
@@ -17,21 +15,12 @@ router.get("/", (req, res) => {
 
   for (const s of sessions) {
     byPersonaCount[s.personaId] = (byPersonaCount[s.personaId] || 0) + 1;
-
     const gaps = s.gapReport?.gaps || [];
     const flashcards = s.gapReport?.flashcards || [];
     totalGaps += gaps.length;
     totalFlashcards += flashcards.length;
-
-    gapsOverTime.push({
-      date: s.createdAt,
-      topic: s.topic,
-      gapCount: gaps.length,
-    });
-
-    for (const card of flashcards) {
-      allFlashcards.push({ ...card, topic: s.topic, sessionId: s.id });
-    }
+    gapsOverTime.push({ date: s.createdAt, topic: s.topic, gapCount: gaps.length });
+    for (const card of flashcards) allFlashcards.push({ ...card, topic: s.topic, sessionId: s.id });
   }
 
   const personaBreakdown = Object.entries(byPersonaCount).map(([personaId, count]) => {
@@ -39,7 +28,7 @@ router.get("/", (req, res) => {
     return { personaId, name: persona?.name || personaId, count };
   });
 
-  res.json({
+  return {
     sessions: sessions.map((s) => ({
       id: s.id,
       topic: s.topic,
@@ -54,10 +43,26 @@ router.get("/", (req, res) => {
       totalGaps,
       totalFlashcards,
       personaBreakdown,
-      gapsOverTime: gapsOverTime.slice().reverse(), // chronological order for charting
+      gapsOverTime: gapsOverTime.slice().reverse(),
     },
     allFlashcards,
-  });
+  };
+}
+
+// GET /api/history — my own history
+router.get("/", (req, res) => {
+  res.json(buildHistoryPayload(req.dbUser.auth0_sub));
+});
+
+// GET /api/history/student/:studentSub — a guardian viewing a linked student's history
+router.get("/student/:studentSub", (req, res) => {
+  if (!["parent", "teacher"].includes(req.dbUser.role)) {
+    return res.status(403).json({ error: "Only parent/teacher accounts can view a student's history" });
+  }
+  if (!isLinked(req.dbUser.auth0_sub, req.params.studentSub)) {
+    return res.status(403).json({ error: "You don't have access to this student's reports" });
+  }
+  res.json(buildHistoryPayload(req.params.studentSub));
 });
 
 module.exports = router;
