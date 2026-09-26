@@ -1,13 +1,12 @@
 const express = require("express");
 const { getPersonaById } = require("../config/personas");
 const { getPersonaTurn, getGapReport } = require("../services/gemini");
-const { speak, ENABLED: VOICE_ENABLED } = require("../services/elevenlabs");
 const { completeSession } = require("../services/db");
 
 const router = express.Router();
 
 // POST /api/session/turn
-// body: { topic, personaId, history: [{role, text}], latestExplanation, detectedGaps: [] }
+// body: { topic, personaId, history: [{role, text}], latestExplanation }
 router.post("/turn", async (req, res) => {
   try {
     const { topic, personaId, history = [], latestExplanation } = req.body;
@@ -24,13 +23,7 @@ router.post("/turn", async (req, res) => {
       latestExplanation,
     });
 
-    let audio = null;
-    if (VOICE_ENABLED && persona.voiceId) {
-      const buf = await speak(`${turn.reaction} ${turn.follow_up_question}`, persona.voiceId);
-      if (buf) audio = buf.toString("base64");
-    }
-
-    res.json({ ...turn, audio });
+    res.json(turn);
   } catch (err) {
     console.error("Error in /session/turn:", err);
     res.status(500).json({ error: "Failed to generate persona turn" });
