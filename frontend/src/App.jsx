@@ -9,6 +9,7 @@ import RoleStep from "./components/RoleStep.jsx";
 import AccessStep from "./components/AccessStep.jsx";
 import VoiceSettingsStep from "./components/VoiceSettingsStep.jsx";
 import GuardianDashboard from "./components/GuardianDashboard.jsx";
+import BookMascot from "./components/BookMascot.jsx";
 import { api } from "./api.js";
 import { useSectionTransition } from "./useAnimations.js";
 
@@ -108,6 +109,8 @@ export default function App() {
 
   return (
     <div className="app-shell">
+      <BookMascot />
+
       <header className="masthead">
         <span className="wordmark">Please help me study!</span>
 

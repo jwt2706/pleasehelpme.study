@@ -1,36 +1,26 @@
-# Say It Back — frontend
+# pleasehelpme.study
 
-Deploys separately from the API, to Vercel or Netlify — `pleasehelpme.study`
-points here; `api.pleasehelpme.study` (Vultr) is the backend.
+You know what they say, teaching is the best way to learn.
 
-## Design
+pleasehelpme.study is a fun little ai buddy that will listen to you explain concepts you are currently studying. It will then ask you questions on parts you may have glossed over, or not explained correctly. It pushes back, and if you fumble the follow-up question, that's exactly the part you need to study more!
 
-Editorial, not dashboard: one narrow column, a serif (Newsreader) for
-headings and personality, a sans (Public Sans) for body text, warm paper
-background, one accent color (deep pine) used only for the primary action.
-The conversation is laid out like marginalia — a persona label in the
-margin, flowing text, hairline rules — rather than chat bubbles. No card
-shadows, no matching border-radius on everything, one motion moment (the
-persona's reply settles in once, per turn).
+It'll generate a beautiful little report on your knowledge gaps to help you know what you need to work on.
 
-Tokens live at the top of `src/styles.css` if you want to adjust the
-palette or type scale.
+feynman technique, but it bullies you a little :)
 
-## Local dev
+live at [pleasehelpme.study](https://pleasehelpme.study)
 
-```bash
-cp .env.example .env     # fill in Auth0 + API URL
-npm install
-npm run dev
-```
+## how it works
 
-## Deploy (Vercel or Netlify)
+1. pick a topic
+2. pick who's grilling you (light / working / deep comprehension)
+3. explain it, answer the follow-ups (voice input + narrated replies supported)
+4. get a gap report + flashcards for the stuff that thinned out
+5. optionally link a parent/teacher account so they can see your reports too
 
-1. Push this folder to a repo (or the whole project, frontend as a subdir).
-2. Import it in Vercel/Netlify, set the build command `npm run build` and
-   output directory `dist`.
-3. Add the three env vars from `.env.example` in the project's dashboard.
-4. Point `pleasehelpme.study` at the deployment (both platforms give you a
-   CNAME/A-record target under Domains).
-5. In your Auth0 application settings, add this domain to **Allowed
-   Callback URLs**, **Allowed Logout URLs**, and **Allowed Web Origins**.
+## stack
+
+- `frontend/` — react + vite, auth0, deployed on vercel/netlify
+- `backend/` — node/express, gemini for the persona brains, sqlite for streaks + links, optional elevenlabs narration, deployed on vultr
+
+built at hack the hill III, held together with hope 🙏

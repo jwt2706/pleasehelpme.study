@@ -1018,3 +1018,85 @@ input::placeholder {
     grid-template-columns: 1fr;
   }
 }
+
+/* ---------- corner mascot (animated book) ----------
+   Sprite sheet is book-sprite.png: the 30 frames of bookanimation.gif
+   laid out in a single horizontal strip (30 × 32px frames, native
+   pixel-art resolution). Using a sprite instead of the raw GIF is what
+   lets this play forward AND backward — GIFs can't be reversed or
+   paused on a frame in CSS/JS, sprite steps can.
+
+   image-rendering: pixelated keeps the up-scaled pixel art crisp
+   (nearest-neighbor) instead of blurring like default bilinear scaling
+   would on such a small source image. --frame controls both the
+   on-screen size and the sprite math together, so resizing for mobile
+   below is just one variable change. */
+
+.book-mascot {
+  --frame: 64px;
+  position: fixed;
+  right: 1.25rem;
+  bottom: 1.25rem;
+  width: var(--frame);
+  height: var(--frame);
+  background-image: url("./assets/book-sprite.png");
+  background-repeat: no-repeat;
+  background-size: calc(var(--frame) * 30) var(--frame);
+  background-position: 0 0;
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+  pointer-events: none;
+  z-index: 5;
+  animation: book-flip 5s steps(1, end) infinite, book-bob 2.6s ease-in-out infinite;
+}
+
+/* 20% hold on frame 0 → 30% play forward → 20% hold on frame 29 →
+   30% play backward. steps(29, end) is what actually walks through the
+   29 frame-to-frame jumps (30 frames) evenly across each play segment. */
+@keyframes book-flip {
+  0% {
+    background-position: 0 0;
+    animation-timing-function: steps(1, end);
+  }
+  20% {
+    background-position: 0 0;
+    animation-timing-function: steps(29, end);
+  }
+  50% {
+    background-position: calc(var(--frame) * -29) 0;
+    animation-timing-function: steps(1, end);
+  }
+  70% {
+    background-position: calc(var(--frame) * -29) 0;
+    animation-timing-function: steps(29, end);
+  }
+  100% {
+    background-position: 0 0;
+  }
+}
+
+@keyframes book-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+@media (max-width: 480px) {
+  .book-mascot {
+    --frame: 48px;
+    right: 0.85rem;
+    bottom: 0.85rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .book-mascot {
+    animation: none;
+    background-position: calc(var(--frame) * -29) 0;
+  }
+}
