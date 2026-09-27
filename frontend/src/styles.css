@@ -76,15 +76,25 @@ body {
 
 .masthead {
   display: flex;
-  align-items: baseline;
+  align-items: flex-start;
   justify-content: space-between;
   margin-bottom: 3.5rem;
+}
+
+.brand-block {
+  display: flex;
+  flex-direction: column;
 }
 
 .header-actions {
   display: flex;
   align-items: center;
   gap: 0.85rem;
+  /* Sits on the same top edge the wordmark used to occupy before the
+     mascot was added above it — .masthead no longer baseline-aligns
+     these two columns, so this keeps the toggle/avatar from drifting
+     down with the taller left-hand column. */
+  padding-top: 0.3rem;
 }
 
 .theme-toggle {
@@ -1032,9 +1042,10 @@ input::placeholder {
    on-screen size and the sprite math together, so resizing for mobile
    below is just one variable change.
 
-   Sits in normal document flow, first thing inside .app-shell, so it
-   naturally pushes the masthead/tagline down below it rather than
-   floating over the page. */
+   Sits in normal flow inside .brand-block, stacked directly above the
+   wordmark — so it pushes just the tagline down, not the theme
+   toggle / avatar on the other side of the header (see .header-actions
+   and .masthead's align-items above). */
 
 .book-mascot {
   --frame: 64px;

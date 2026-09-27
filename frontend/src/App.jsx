@@ -109,10 +109,11 @@ export default function App() {
 
   return (
     <div className="app-shell">
-      <BookMascot />
-
       <header className="masthead">
-        <span className="wordmark">Please help me study!</span>
+        <div className="brand-block">
+          <BookMascot />
+          <span className="wordmark">Please help me study!</span>
+        </div>
 
         <div className="header-actions">
           <button
