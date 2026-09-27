@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 import TopicStep from "./components/TopicStep.jsx";
 import PersonaStep from "./components/PersonaStep.jsx";
@@ -26,6 +26,8 @@ export default function App() {
   const [report, setReport] = useState(null);
   const [streak, setStreak] = useState(null);
   const [account, setAccount] = useState(null); // { sub, email, role, roleSelected }
+  const [menuOpen, setMenuOpen] = useState(false);
+  const accountRef = useRef(null);
 
   const getToken = useCallback(() => getAccessTokenSilently(), [getAccessTokenSilently]);
 
@@ -46,6 +48,18 @@ export default function App() {
     })();
   }, [isAuthenticated, getToken]);
 
+  // Close the account dropdown when clicking anywhere outside it.
+  useEffect(() => {
+    if (!menuOpen) return;
+    function handleClickOutside(e) {
+      if (accountRef.current && !accountRef.current.contains(e.target)) {
+        setMenuOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [menuOpen]);
+
   function restart() {
     setTopic("");
     setPersona(null);
@@ -61,29 +75,54 @@ export default function App() {
       <header className="masthead">
         <span className="wordmark">Please help me study!</span>
         {isLoading ? null : isAuthenticated ? (
-          <div className="account">
-            {account?.role === "student" && (
-              <>
+          <div className="account" ref={accountRef}>
+            <button
+              className="avatar-button"
+              onClick={() => setMenuOpen((o) => !o)}
+              aria-haspopup="true"
+              aria-expanded={menuOpen}
+              aria-label="Account menu"
+            >
+              <span className="avatar" title={user?.name || user?.email}>
+                {user?.picture ? <img src={user.picture} alt="" /> : initial}
+              </span>
+            </button>
+
+            {menuOpen && (
+              <div className="account-menu">
+                {account?.role === "student" && (
+                  <>
+                    <button
+                      className="auth-action"
+                      onClick={() => {
+                        setMenuOpen(false);
+                        onHistory ? restart() : setStep("history");
+                      }}
+                    >
+                      {onHistory ? "New session" : "History"}
+                    </button>
+                    <button
+                      className="auth-action"
+                      onClick={() => {
+                        setMenuOpen(false);
+                        setStep("access");
+                      }}
+                    >
+                      Access
+                    </button>
+                  </>
+                )}
                 <button
                   className="auth-action"
-                  onClick={() => (onHistory ? restart() : setStep("history"))}
+                  onClick={() => {
+                    setMenuOpen(false);
+                    logout({ logoutParams: { returnTo: window.location.origin } });
+                  }}
                 >
-                  {onHistory ? "New session" : "History"}
+                  Log out
                 </button>
-                <button className="auth-action" onClick={() => setStep("access")}>
-                  Access
-                </button>
-              </>
+              </div>
             )}
-            <span className="avatar" title={user?.name || user?.email}>
-              {user?.picture ? <img src={user.picture} alt="" /> : initial}
-            </span>
-            <button
-              className="auth-action"
-              onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}
-            >
-              Log out
-            </button>
           </div>
         ) : (
           <button className="auth-action" onClick={() => loginWithRedirect()}>

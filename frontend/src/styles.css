@@ -89,6 +89,80 @@ body {
   color: var(--ink);
 }
 
+/* ---------- account menu (avatar + dropdown) ---------- */
+
+.account {
+  position: relative;
+  display: flex;
+  align-items: center;
+  align-self: center;
+}
+
+.avatar-button {
+  background: none;
+  border: none;
+  padding: 0;
+  line-height: 0;
+  cursor: pointer;
+  border-radius: 50%;
+}
+
+.avatar-button:hover .avatar {
+  border-color: var(--ink-soft);
+}
+
+.avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-family: var(--serif);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  border: 1px solid var(--line);
+}
+
+.avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.account-menu {
+  position: absolute;
+  top: calc(100% + 0.6rem);
+  right: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  min-width: 9.5rem;
+  background: var(--paper-raised);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 0.35rem;
+  box-shadow: 0 6px 20px rgba(38, 36, 32, 0.1);
+}
+
+.account-menu .auth-action {
+  width: 100%;
+  text-align: left;
+  padding: 0.5rem 0.6rem;
+  border-radius: 4px;
+  text-decoration: none;
+  font-size: 0.875rem;
+}
+
+.account-menu .auth-action:hover {
+  background: var(--accent-soft);
+  color: var(--ink);
+}
+
 /* ---------- typography ---------- */
 
 h1 {

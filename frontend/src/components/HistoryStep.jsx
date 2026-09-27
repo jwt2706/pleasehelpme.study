@@ -29,7 +29,7 @@ function formatDate(iso) {
   return new Date(iso).toLocaleDateString(undefined, { month: "short", day: "numeric" });
 }
 
-export default function HistoryStep({ getToken, onStartNew }) {
+export default function HistoryStep({ getToken, studentSub, onStartNew }) {
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
   const [openId, setOpenId] = useState(null);
