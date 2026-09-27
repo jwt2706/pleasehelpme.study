@@ -7,6 +7,7 @@ import ReportStep from "./components/ReportStep.jsx";
 import HistoryStep from "./components/HistoryStep.jsx";
 import RoleStep from "./components/RoleStep.jsx";
 import AccessStep from "./components/AccessStep.jsx";
+import VoiceSettingsStep from "./components/VoiceSettingsStep.jsx";
 import GuardianDashboard from "./components/GuardianDashboard.jsx";
 import { api } from "./api.js";
 import { useSectionTransition } from "./useAnimations.js";
@@ -15,6 +16,14 @@ function getInitialTheme() {
   const stored = localStorage.getItem("sib-theme");
   if (stored === "light" || stored === "dark") return stored;
   return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+}
+
+function getInitialVoiceEnabled() {
+  return localStorage.getItem("sib-voice-enabled") === "true";
+}
+
+function getInitialVoiceId() {
+  return localStorage.getItem("sib-voice-id") || "";
 }
 
 export default function App() {
@@ -27,7 +36,7 @@ export default function App() {
     user,
   } = useAuth0();
 
-  const [step, setStep] = useState("topic"); // topic | persona | conversation | report | history | access
+  const [step, setStep] = useState("topic"); // topic | persona | conversation | report | history | access | voice-settings
   const [topic, setTopic] = useState("");
   const [persona, setPersona] = useState(null);
   const [report, setReport] = useState(null);
@@ -35,6 +44,8 @@ export default function App() {
   const [account, setAccount] = useState(null); // { sub, email, role, roleSelected }
   const [menuOpen, setMenuOpen] = useState(false);
   const [theme, setTheme] = useState(getInitialTheme);
+  const [voiceEnabled, setVoiceEnabled] = useState(getInitialVoiceEnabled);
+  const [voiceId, setVoiceId] = useState(getInitialVoiceId);
   const accountRef = useRef(null);
 
   const getToken = useCallback(() => getAccessTokenSilently(), [getAccessTokenSilently]);
@@ -47,6 +58,14 @@ export default function App() {
     document.documentElement.setAttribute("data-theme", theme);
     localStorage.setItem("sib-theme", theme);
   }, [theme]);
+
+  useEffect(() => {
+    localStorage.setItem("sib-voice-enabled", String(voiceEnabled));
+  }, [voiceEnabled]);
+
+  useEffect(() => {
+    if (voiceId) localStorage.setItem("sib-voice-id", voiceId);
+  }, [voiceId]);
 
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -133,6 +152,15 @@ export default function App() {
                         className="auth-action"
                         onClick={() => {
                           setMenuOpen(false);
+                          setStep("voice-settings");
+                        }}
+                      >
+                        Voice
+                      </button>
+                      <button
+                        className="auth-action"
+                        onClick={() => {
+                          setMenuOpen(false);
                           setStep("access");
                         }}
                       >
@@ -213,6 +241,8 @@ export default function App() {
                     topic={topic}
                     persona={persona}
                     getToken={getToken}
+                    voiceEnabled={voiceEnabled}
+                    voiceId={voiceId}
                     onFinish={(result) => {
                       setReport(result);
                       setStreak(result.streak);
@@ -230,6 +260,17 @@ export default function App() {
 
                 {step === "access" && (
                   <AccessStep getToken={getToken} onBack={() => setStep("topic")} />
+                )}
+
+                {step === "voice-settings" && (
+                  <VoiceSettingsStep
+                    getToken={getToken}
+                    voiceEnabled={voiceEnabled}
+                    onToggleEnabled={setVoiceEnabled}
+                    voiceId={voiceId}
+                    onChangeVoice={setVoiceId}
+                    onBack={() => setStep("topic")}
+                  />
                 )}
               </>
             )}

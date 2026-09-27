@@ -33,4 +33,21 @@ export const api = {
   getLinkedStudents: (token) => request("/api/link/students", { token }),
   getGuardians: (token) => request("/api/link/guardians", { token }),
   removeLink: (token, otherSub) => request(`/api/link/${otherSub}`, { token, method: "DELETE" }),
+  getVoiceStatus: (token) => request("/api/voice/status", { token }),
+  // Returns a Blob (audio/mpeg), not JSON — can't reuse request() for this.
+  speakText: async (token, { text, voiceId }) => {
+    const res = await fetch(`${BASE_URL}/api/voice/speak`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ text, voiceId }),
+    });
+    if (!res.ok) {
+      const detail = await res.json().catch(() => ({}));
+      throw new Error(detail.error || `Request failed (${res.status})`);
+    }
+    return res.blob();
+  },
 };

@@ -1,4 +1,3 @@
-/* frontend/src/styles.css */
 :root {
   --paper: #eae7df;
   --paper-raised: #f2f0e9;
@@ -604,6 +603,181 @@ input::placeholder {
     opacity: 1;
     transform: translateY(-3px);
   }
+}
+
+/* ---------- voice: narration + mic ---------- */
+
+.audio-visualizer {
+  width: 100%;
+  height: 28px;
+  display: block;
+}
+
+.narration-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 0;
+}
+
+.narration-row .audio-visualizer {
+  flex: 1;
+}
+
+.narration-stop {
+  font-size: 0.8125rem;
+  color: var(--ink-soft);
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: var(--line);
+  white-space: nowrap;
+  padding: 0;
+}
+
+.narration-stop:hover {
+  color: var(--ink);
+}
+
+.mic-visualizer-row {
+  margin-top: 0.6rem;
+}
+
+.input-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.75rem;
+}
+
+.input-row textarea {
+  flex: 1;
+}
+
+.mic-button {
+  flex-shrink: 0;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: var(--paper-raised);
+  color: var(--ink-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: border-color var(--transition-fast), color var(--transition-fast),
+    background-color var(--transition-fast);
+}
+
+.mic-button:hover:not(:disabled) {
+  color: var(--ink);
+  border-color: var(--ink-soft);
+}
+
+.mic-button.recording {
+  color: var(--error);
+  border-color: var(--error);
+  animation: mic-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes mic-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(161, 69, 58, 0.25);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(161, 69, 58, 0.08);
+  }
+}
+
+.mic-button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ---------- settings rows (voice, etc.) ---------- */
+
+.settings-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.1rem 0.25rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.settings-row:last-of-type {
+  border-bottom: none;
+}
+
+.settings-label {
+  font-family: var(--serif);
+  font-size: 1.0625rem;
+  margin: 0 0 0.15rem;
+}
+
+.settings-desc {
+  font-size: 0.875rem;
+  color: var(--ink-soft);
+  margin: 0;
+}
+
+.voice-select {
+  font-family: var(--sans);
+  font-size: 0.9375rem;
+  color: var(--ink);
+  background: var(--paper-raised);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 0.55rem 0.75rem;
+  min-width: 10rem;
+  cursor: pointer;
+}
+
+.switch {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  width: 2.75rem;
+  height: 1.5rem;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  position: absolute;
+}
+
+.switch-track {
+  position: absolute;
+  inset: 0;
+  background: var(--line);
+  border-radius: 999px;
+  transition: background-color var(--transition-fast);
+}
+
+.switch-thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 50%;
+  background: var(--paper-raised);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+  transition: transform var(--transition-fast);
+}
+
+.switch input:checked + .switch-track {
+  background: var(--accent);
+}
+
+.switch input:checked + .switch-track .switch-thumb {
+  transform: translateX(1.25rem);
 }
 
 /* ---------- gap report ---------- */
