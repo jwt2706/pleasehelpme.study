@@ -15,6 +15,7 @@ import {
   Legend,
 } from "recharts";
 import Flashcard from "./Flashcard.jsx";
+import ThinkingIndicator from "./ThinkingIndicator.jsx";
 import { api } from "../api.js";
 import { useStagger } from "../useAnimations.js";
 
@@ -24,7 +25,7 @@ const PERSONA_COLORS = {
   deep: "#6f5f82",
 };
 
-const PIE_COLORS = ["#3f5d52", "#a85c3f"];
+const PIE_COLORS = ["#3a5b7c", "#a85c3f"];
 
 function formatDate(iso) {
   return new Date(iso).toLocaleDateString(undefined, { month: "short", day: "numeric" });
@@ -64,7 +65,7 @@ export default function HistoryStep({ getToken, studentSub, onStartNew }) {
     return (
       <section>
         <h1>History</h1>
-        <p className="thinking">Pulling up your past sessions…</p>
+        <ThinkingIndicator label="Pulling up your past sessions" />
       </section>
     );
   }
@@ -174,7 +175,7 @@ export default function HistoryStep({ getToken, studentSub, onStartNew }) {
               formatter={(value) => [value, "Gaps"]}
               contentStyle={{ fontFamily: "Public Sans, sans-serif", fontSize: 13 }}
             />
-            <Line type="monotone" dataKey="gapCount" stroke="#3f5d52" strokeWidth={2} dot={{ r: 3 }} />
+            <Line type="monotone" dataKey="gapCount" stroke="#3a5b7c" strokeWidth={2} dot={{ r: 3 }} />
           </LineChart>
         </ResponsiveContainer>
       </div>

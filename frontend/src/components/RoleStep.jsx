@@ -11,6 +11,7 @@ export default function RoleStep({ onSelect }) {
       <div className="persona-list">
         {options.map((o) => (
           <button key={o.id} className="persona-row" onClick={() => onSelect(o.id)}>
+            <span className="role-mark">{o.id.charAt(0).toUpperCase()}</span>
             <span className="persona-copy">
               <p className="persona-name">{o.label}</p>
               <p className="persona-desc">{o.desc}</p>

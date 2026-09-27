@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { api } from "../api.js";
+import ThinkingIndicator from "./ThinkingIndicator.jsx";
 
 const MAX_EXCHANGES = 3;
 
@@ -16,6 +17,7 @@ export default function ConversationStep({
   const [gaps, setGaps] = useState([]);
   const [lastTurnId, setLastTurnId] = useState(null);
   const [busy, setBusy] = useState(false);
+  const [finishing, setFinishing] = useState(false);
   const [error, setError] = useState(null);
   const conversationRef = useRef(null);
 
@@ -70,6 +72,7 @@ export default function ConversationStep({
 
   async function finish() {
     setBusy(true);
+    setFinishing(true);
     setError(null);
     try {
       const token = await getToken();
@@ -83,6 +86,7 @@ export default function ConversationStep({
     } catch (err) {
       setError(err.message);
       setBusy(false);
+      setFinishing(false);
     }
   }
 
@@ -119,7 +123,11 @@ export default function ConversationStep({
             </div>
           </div>
         ))}
-        {busy && <p className="thinking">Thinking it over…</p>}
+        {busy && (
+          <ThinkingIndicator
+            label={finishing ? "Reading between the lines" : `${persona.name} is thinking`}
+          />
+        )}
       </div>
 
       {!reachedMax && (

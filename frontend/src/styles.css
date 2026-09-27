@@ -1,11 +1,13 @@
+/* frontend/src/styles.css */
 :root {
   --paper: #eae7df;
   --paper-raised: #f2f0e9;
   --ink: #262420;
   --ink-soft: #6b675e;
   --line: #d9d5c9;
-  --accent: #3f5d52;
-  --accent-soft: #dde5de;
+  --accent: #3a5b7c;
+  --accent-soft: #dbe3ea;
+  --error: #a1453a;
 
   --persona-light: #8b6f47;
   --persona-working: #55677a;
@@ -26,8 +28,9 @@
   --ink: #ece9e2;
   --ink-soft: #a39d8f;
   --line: #3a3733;
-  --accent: #7fa393;
-  --accent-soft: #26332d;
+  --accent: #82abc9;
+  --accent-soft: #24313c;
+  --error: #d9897c;
 
   --persona-light: #c9a876;
   --persona-working: #8fa3b8;
@@ -332,7 +335,7 @@ input::placeholder {
 }
 
 .btn-primary:not(:disabled):hover {
-  background: #345048;
+  background: #2f4a63;
 }
 
 .btn-quiet {
@@ -381,7 +384,7 @@ input::placeholder {
   transform: translateY(-1px);
 }
 
-/* ---------- persona picker ---------- */
+/* ---------- persona / role picker ---------- */
 
 .persona-list {
   display: flex;
@@ -391,11 +394,44 @@ input::placeholder {
 }
 
 .persona-row {
-  transition: background-color var(--transition-fast);
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--line);
+  padding: 1.15rem 0.25rem;
+  cursor: pointer;
+  font-family: var(--sans);
+  color: var(--ink);
+  transition: background-color var(--transition-fast), padding-left var(--transition-fast);
+}
+
+.persona-row:last-child {
+  border-bottom: none;
 }
 
 .persona-row:hover:not(:disabled) {
   background: var(--paper-raised);
+  padding-left: 0.65rem;
+}
+
+.persona-row::after {
+  content: "→";
+  margin-left: auto;
+  align-self: center;
+  padding-left: 0.5rem;
+  color: var(--ink-soft);
+  opacity: 0;
+  transform: translateX(-4px);
+  transition: opacity var(--transition-fast), transform var(--transition-fast);
+}
+
+.persona-row:hover:not(:disabled)::after {
+  opacity: 1;
+  transform: translateX(0);
 }
 
 .persona-mark {
@@ -403,12 +439,59 @@ input::placeholder {
   width: 9px;
   height: 9px;
   border-radius: 50%;
-  margin-top: 0.5rem;
+  margin-top: 0.55rem;
   background: var(--dot-color, var(--ink-soft));
+}
+
+.depth-meter {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  flex-shrink: 0;
+  height: 1rem;
+  margin-top: 0.3rem;
+}
+
+.depth-bar {
+  width: 3px;
+  border-radius: 2px;
+  background: var(--line);
+  transition: background-color var(--transition-fast);
+}
+
+.depth-bar:nth-child(1) {
+  height: 40%;
+}
+.depth-bar:nth-child(2) {
+  height: 70%;
+}
+.depth-bar:nth-child(3) {
+  height: 100%;
+}
+
+.depth-bar.filled {
+  background: var(--dot-color, var(--accent));
+}
+
+.role-mark {
+  flex-shrink: 0;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-family: var(--serif);
+  font-size: 0.9375rem;
+  border: 1px solid var(--line);
+  transition: background-color var(--transition-smooth), border-color var(--transition-smooth);
 }
 
 .persona-copy {
   flex: 1;
+  min-width: 0;
 }
 
 .persona-name {
@@ -477,11 +560,50 @@ input::placeholder {
   color: var(--ink);
 }
 
-.thinking {
+/* ---------- thinking indicator ---------- */
+
+.thinking-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
   font-size: 0.9375rem;
   color: var(--ink-soft);
   font-style: italic;
   padding: 1rem 0;
+}
+
+.thinking-dots {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.28rem;
+}
+
+.thinking-dots .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ink-soft);
+  animation: thinking-pulse 1.1s ease-in-out infinite;
+}
+
+.thinking-dots .dot:nth-child(2) {
+  animation-delay: 0.15s;
+}
+.thinking-dots .dot:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+@keyframes thinking-pulse {
+  0%,
+  60%,
+  100% {
+    opacity: 0.25;
+    transform: translateY(0);
+  }
+  30% {
+    opacity: 1;
+    transform: translateY(-3px);
+  }
 }
 
 /* ---------- gap report ---------- */
@@ -578,7 +700,7 @@ input::placeholder {
 /* ---------- misc ---------- */
 
 .error-note {
-  color: var(--kid);
+  color: var(--error);
   font-size: 0.9375rem;
   margin-top: 0.75rem;
 }

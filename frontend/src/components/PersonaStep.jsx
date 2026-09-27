@@ -12,14 +12,18 @@ export default function PersonaStep({ topic, onSelect, onBack }) {
       <p className="lede">Explaining “{topic}” — pick how hard the follow-ups should push.</p>
 
       <div className="persona-list" ref={listRef}>
-        {PERSONAS.map((persona) => (
+        {PERSONAS.map((persona, i) => (
           <button
             key={persona.id}
             className="persona-row"
             style={{ "--dot-color": persona.color }}
             onClick={() => onSelect(persona)}
           >
-            <span className="persona-mark" />
+            <span className="depth-meter" aria-hidden="true">
+              {[0, 1, 2].map((n) => (
+                <span key={n} className={`depth-bar${n <= i ? " filled" : ""}`} />
+              ))}
+            </span>
             <span className="persona-copy">
               <p className="persona-name">{persona.name}</p>
               <p className="persona-desc">{persona.description}</p>
