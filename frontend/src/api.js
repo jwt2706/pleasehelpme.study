@@ -50,4 +50,9 @@ export const api = {
     }
     return res.blob();
   },
+  // Fallback speech-to-text: sends a base64-encoded audio recording and
+  // gets back { text } — used when the browser's native speech recognition
+  // doesn't work (e.g. Brave) or doesn't exist (e.g. Firefox).
+  transcribeAudio: (token, { audio, mimeType }) =>
+    request("/api/voice/transcribe", { token, method: "POST", body: { audio, mimeType } }),
 };

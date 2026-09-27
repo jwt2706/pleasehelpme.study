@@ -188,4 +188,33 @@ question, back = answer) built directly from the gaps so they can study them.`;
   }
 }
 
-module.exports = { getPersonaTurn, getGapReport, GeminiRequestError };
+/**
+ * Transcribes a short audio clip — used as a fallback for browsers (Brave,
+ * Firefox) whose built-in Web Speech API either doesn't work or doesn't
+ * exist. audioBase64 is raw base64 audio data (no "data:" URL prefix).
+ */
+async function transcribeAudio({ audioBase64, mimeType }) {
+  const model = genAI.getGenerativeModel({ model: MODEL_NAME });
+
+  const prompt = `Transcribe the words spoken in this audio clip exactly as
+spoken. Return ONLY the transcript text — no labels, quotation marks, or
+commentary. If nothing intelligible was said, return an empty string.`;
+
+  let result;
+  try {
+    result = await model.generateContent([
+      { inlineData: { data: audioBase64, mimeType: mimeType || "audio/webm" } },
+      { text: prompt },
+    ]);
+  } catch (err) {
+    throw wrapGeminiError(err);
+  }
+
+  try {
+    return result.response.text().trim();
+  } catch (err) {
+    throw wrapGeminiError(err);
+  }
+}
+
+module.exports = { getPersonaTurn, getGapReport, transcribeAudio, GeminiRequestError };

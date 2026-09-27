@@ -47,7 +47,7 @@ export default function ConversationStep({
   const conversationRef = useRef(null);
 
   const tts = useTtsPlayer({ getToken, apiSpeak: api.speakText });
-  const mic = useMicInput({ onResult: (text) => setDraft(text) });
+  const mic = useMicInput({ onResult: (text) => setDraft(text), getToken });
 
   const exchangeCount = history.filter((h) => h.role === "user").length;
   const canFinish = exchangeCount >= 1;
@@ -221,10 +221,12 @@ export default function ConversationStep({
               type="button"
               className={`mic-button${mic.isRecording ? " recording" : ""}`}
               onClick={toggleMic}
-              disabled={busy || !mic.supported}
+              disabled={busy || !mic.supported || mic.isTranscribing}
               title={
                 mic.supported
-                  ? mic.isRecording
+                  ? mic.isTranscribing
+                    ? "Transcribing…"
+                    : mic.isRecording
                     ? "Stop recording"
                     : "Speak your answer"
                   : "Speech input isn't supported in this browser"
@@ -239,6 +241,8 @@ export default function ConversationStep({
               <AudioVisualizer analyser={mic.analyser} active={mic.isRecording} color="var(--error)" />
             </div>
           )}
+          {mic.isTranscribing && <p className="session-note">Transcribing…</p>}
+          {mic.error && <p className="error-note">{mic.error}</p>}
         </div>
       )}
 

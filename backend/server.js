@@ -24,7 +24,10 @@ app.use(
     origin: allowedOrigins.length ? allowedOrigins : true,
   })
 );
-app.use(express.json({ limit: "2mb" }));
+// 20mb (not 2mb) because /api/voice/transcribe accepts base64-encoded audio
+// recordings as a fallback for browsers whose native speech recognition
+// doesn't work (see routes/voice.js) — base64 inflates the raw size ~33%.
+app.use(express.json({ limit: "20mb" }));
 
 app.get("/health", (req, res) => {
   res.json({ ok: true, service: "say-it-back-api", time: new Date().toISOString() });
