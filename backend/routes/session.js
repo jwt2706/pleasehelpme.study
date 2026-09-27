@@ -26,7 +26,9 @@ router.post("/turn", async (req, res) => {
     res.json(turn);
   } catch (err) {
     console.error("Error in /session/turn:", err);
-    res.status(500).json({ error: "Failed to generate persona turn" });
+    res.status(err.statusCode || 500).json({
+      error: err.message || "Failed to generate persona turn",
+    });
   }
 });
 
@@ -47,7 +49,9 @@ router.post("/complete", async (req, res) => {
     res.json({ gapReport, sessionsCompleted: user.sessions_completed, streak: user.streak_count });
   } catch (err) {
     console.error("Error in /session/complete:", err);
-    res.status(500).json({ error: "Failed to generate gap report" });
+    res.status(err.statusCode || 500).json({
+      error: err.message || "Failed to generate gap report",
+    });
   }
 });
 

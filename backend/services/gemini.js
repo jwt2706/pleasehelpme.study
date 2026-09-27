@@ -34,6 +34,74 @@ const REPORT_SCHEMA = {
   required: ["nailed", "gaps", "flashcards"],
 };
 
+// Carries a status code so the route can return something more useful
+// than a blanket 500, and a message that says WHY rather than just "failed."
+class GeminiRequestError extends Error {
+  constructor(message, statusCode) {
+    super(message);
+    this.name = "GeminiRequestError";
+    this.statusCode = statusCode;
+  }
+}
+
+function wrapGeminiError(err) {
+  if (!process.env.GEMINI_API_KEY) {
+    return new GeminiRequestError(
+      "GEMINI_API_KEY is not set on the server — Gemini calls can't run without it.",
+      500
+    );
+  }
+
+  // The SDK's thrown errors usually stringify like
+  // "[503 Service Unavailable] The model is overloaded" — pull the HTTP
+  // status out of that if it's there.
+  const match = /\[(\d{3})\s*([^\]]*)\]/.exec(err?.message || "");
+  const httpStatus = match ? Number(match[1]) : err?.status;
+  const httpStatusText = match ? match[2].trim() : undefined;
+
+  if (httpStatus === 400) {
+    return new GeminiRequestError(
+      `Gemini rejected the request as malformed (HTTP 400) — check the server logs for the raw prompt/schema. Raw: ${err.message}`,
+      502
+    );
+  }
+  if (httpStatus === 401 || httpStatus === 403) {
+    return new GeminiRequestError(
+      `Gemini rejected the API key (HTTP ${httpStatus}). Double-check GEMINI_API_KEY is valid and has access to "${MODEL_NAME}".`,
+      502
+    );
+  }
+  if (httpStatus === 404) {
+    return new GeminiRequestError(
+      `Gemini couldn't find the model "${MODEL_NAME}" (HTTP 404). Check GEMINI_MODEL is spelled correctly and available to your key.`,
+      502
+    );
+  }
+  if (httpStatus === 429) {
+    return new GeminiRequestError(
+      "Gemini rate-limited this request (HTTP 429) — you're over your quota or requests-per-minute limit. Try again shortly.",
+      503
+    );
+  }
+  if (httpStatus === 500 || httpStatus === 503) {
+    return new GeminiRequestError(
+      `Gemini's servers had a problem (HTTP ${httpStatus}${httpStatusText ? ` ${httpStatusText}` : ""}) — this is on Google's end, try again in a moment.`,
+      503
+    );
+  }
+  if (err instanceof SyntaxError) {
+    return new GeminiRequestError(
+      "Gemini returned a response that wasn't valid JSON, even in JSON mode — it may have hit a length limit or had an internal hiccup. Try again.",
+      502
+    );
+  }
+
+  return new GeminiRequestError(
+    `Gemini request failed${httpStatus ? ` (HTTP ${httpStatus})` : ""}: ${err?.message || "unknown error"}`,
+    502
+  );
+}
+
 /**
  * One turn of persona reaction + follow-up question.
  * history: array of { role: "user"|"assistant", text: string }
@@ -62,8 +130,18 @@ Learner's latest explanation:
 
 Respond in character with your JSON reaction, per the schema.`;
 
-  const result = await model.generateContent(prompt);
-  return JSON.parse(result.response.text());
+  let result;
+  try {
+    result = await model.generateContent(prompt);
+  } catch (err) {
+    throw wrapGeminiError(err);
+  }
+
+  try {
+    return JSON.parse(result.response.text());
+  } catch (err) {
+    throw wrapGeminiError(err);
+  }
 }
 
 /**
@@ -96,8 +174,18 @@ Produce a Gap Report as JSON: what the learner explained well ("nailed"),
 specific gaps in their understanding ("gaps"), and 2-3 flashcards (front =
 question, back = answer) built directly from the gaps so they can study them.`;
 
-  const result = await model.generateContent(prompt);
-  return JSON.parse(result.response.text());
+  let result;
+  try {
+    result = await model.generateContent(prompt);
+  } catch (err) {
+    throw wrapGeminiError(err);
+  }
+
+  try {
+    return JSON.parse(result.response.text());
+  } catch (err) {
+    throw wrapGeminiError(err);
+  }
 }
 
-module.exports = { getPersonaTurn, getGapReport };
+module.exports = { getPersonaTurn, getGapReport, GeminiRequestError };

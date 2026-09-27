@@ -10,6 +10,7 @@ const { checkJwt, attachUser } = require("./middleware/auth");
 const personasRouter = require("./routes/personas");
 const sessionRouter = require("./routes/session");
 const historyRouter = require("./routes/history");
+const voiceRouter = require("./routes/voice");
 
 const app = express();
 
@@ -34,6 +35,7 @@ app.use("/api/personas", checkJwt, attachUser, personasRouter);
 app.use("/api/session", checkJwt, attachUser, sessionRouter);
 app.use("/api/history", checkJwt, attachUser, historyRouter);
 app.use("/api/link", checkJwt, attachUser, linkRouter);
+app.use("/api/voice", checkJwt, attachUser, voiceRouter);
 
 app.use((err, req, res, next) => {
   if (err.name === "UnauthorizedError") {
