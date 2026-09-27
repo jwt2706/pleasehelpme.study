@@ -66,7 +66,7 @@ body {
 .app-shell {
   max-width: 640px;
   margin: 0 auto;
-  padding: 6.5rem 1.5rem 6rem;
+  padding: 3rem 1.5rem 6rem;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -885,9 +885,6 @@ input::placeholder {
 }
 
 @media (max-width: 480px) {
-  .app-shell {
-    padding-top: 5rem;
-  }
   h1 {
     font-size: 1.875rem;
   }
@@ -1033,15 +1030,17 @@ input::placeholder {
    (nearest-neighbor) instead of blurring like default bilinear scaling
    would on such a small source image. --frame controls both the
    on-screen size and the sprite math together, so resizing for mobile
-   below is just one variable change. */
+   below is just one variable change.
+
+   Sits in normal document flow, first thing inside .app-shell, so it
+   naturally pushes the masthead/tagline down below it rather than
+   floating over the page. */
 
 .book-mascot {
   --frame: 64px;
-  position: fixed;
-  top: 1rem;
-  left: 1.5rem;
   width: var(--frame);
   height: var(--frame);
+  margin-bottom: 0.75rem;
   background-image: url("./assets/book-sprite.png");
   background-repeat: no-repeat;
   background-size: calc(var(--frame) * 30) var(--frame);
@@ -1049,8 +1048,6 @@ input::placeholder {
   image-rendering: pixelated;
   image-rendering: -moz-crisp-edges;
   image-rendering: crisp-edges;
-  pointer-events: none;
-  z-index: 5;
   animation: book-flip 5s steps(1, end) infinite, book-bob 2.6s ease-in-out infinite;
 }
 
@@ -1092,8 +1089,7 @@ input::placeholder {
 @media (max-width: 480px) {
   .book-mascot {
     --frame: 48px;
-    top: 0.75rem;
-    left: 1rem;
+    margin-bottom: 0.5rem;
   }
 }
 
