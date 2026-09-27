@@ -1,12 +1,17 @@
+import { useRef } from "react";
 import { PERSONAS } from "../personas.js";
+import { useStagger } from "../useAnimations.js";
 
 export default function PersonaStep({ topic, onSelect, onBack }) {
+  const listRef = useRef(null);
+  useStagger(listRef, ".persona-row", []);
+
   return (
     <section>
       <h1>How deep should this go?</h1>
       <p className="lede">Explaining “{topic}” — pick how hard the follow-ups should push.</p>
 
-      <div className="persona-list">
+      <div className="persona-list" ref={listRef}>
         {PERSONAS.map((persona) => (
           <button
             key={persona.id}

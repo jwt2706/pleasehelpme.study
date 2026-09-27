@@ -1,10 +1,14 @@
+import { useRef } from "react";
 import Flashcard from "./Flashcard.jsx";
+import { useStagger } from "../useAnimations.js";
 
 export default function ReportStep({ topic, report, streak, onRestart }) {
   const { nailed = [], gaps = [], flashcards = [] } = report.gapReport || {};
+  const containerRef = useRef(null);
+  useStagger(containerRef, ".report-list li, .flashcard", [report]);
 
   return (
-    <section>
+    <section ref={containerRef}>
       <h1>Here's what actually happened.</h1>
       <p className="lede">Your explanation of “{topic}”, sorted into what held up.</p>
 

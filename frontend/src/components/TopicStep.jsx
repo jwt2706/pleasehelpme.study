@@ -1,8 +1,11 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { TOPIC_SUGGESTIONS } from "../personas.js";
+import { useStagger } from "../useAnimations.js";
 
 export default function TopicStep({ onContinue }) {
   const [topic, setTopic] = useState("");
+  const chipRowRef = useRef(null);
+  useStagger(chipRowRef, ".chip", []);
 
   return (
     <section>
@@ -28,7 +31,7 @@ export default function TopicStep({ onContinue }) {
           />
         </div>
 
-        <div className="chip-row">
+        <div className="chip-row" ref={chipRowRef}>
           {TOPIC_SUGGESTIONS.map((t) => (
             <button
               type="button"

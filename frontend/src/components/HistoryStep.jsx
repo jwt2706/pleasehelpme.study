@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   ResponsiveContainer,
   BarChart,
@@ -16,6 +16,7 @@ import {
 } from "recharts";
 import Flashcard from "./Flashcard.jsx";
 import { api } from "../api.js";
+import { useStagger } from "../useAnimations.js";
 
 const PERSONA_COLORS = {
   light: "#8b6f47",
@@ -33,6 +34,8 @@ export default function HistoryStep({ getToken, studentSub, onStartNew }) {
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
   const [openId, setOpenId] = useState(null);
+  const containerRef = useRef(null);
+  useStagger(containerRef, ".stat-card, .chart-card, .history-row, .flashcard", [data]);
 
   useEffect(() => {
     (async () => {
@@ -89,7 +92,7 @@ export default function HistoryStep({ getToken, studentSub, onStartNew }) {
   ];
 
   return (
-    <section>
+    <section ref={containerRef}>
       <h1>What you've learned about yourself.</h1>
       <p className="lede">
         {stats.totalSessions} session{stats.totalSessions === 1 ? "" : "s"} so far.

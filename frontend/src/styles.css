@@ -14,7 +14,26 @@
   --serif: "Newsreader", Georgia, serif;
   --sans: "Public Sans", system-ui, sans-serif;
 
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-smooth: 350ms cubic-bezier(0.16, 1, 0.3, 1);
+
   color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  --paper: #1b1a17;
+  --paper-raised: #232220;
+  --ink: #ece9e2;
+  --ink-soft: #a39d8f;
+  --line: #3a3733;
+  --accent: #7fa393;
+  --accent-soft: #26332d;
+
+  --persona-light: #c9a876;
+  --persona-working: #8fa3b8;
+  --persona-deep: #a893c2;
+
+  color-scheme: dark;
 }
 
 * {
@@ -34,6 +53,7 @@ body {
   font-size: 16px;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
+  transition: background-color var(--transition-smooth), color var(--transition-smooth);
 }
 
 :focus-visible {
@@ -57,6 +77,34 @@ body {
   align-items: baseline;
   justify-content: space-between;
   margin-bottom: 3.5rem;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.theme-toggle {
+  background: none;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  width: 2.25rem;
+  height: 2.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9375rem;
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: border-color var(--transition-fast), color var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+.theme-toggle:hover {
+  color: var(--ink);
+  border-color: var(--ink-soft);
+  transform: rotate(15deg);
 }
 
 .wordmark {
@@ -83,6 +131,7 @@ body {
   text-underline-offset: 3px;
   cursor: pointer;
   padding: 0;
+  transition: color var(--transition-fast);
 }
 
 .auth-action:hover {
@@ -125,6 +174,7 @@ body {
   font-size: 0.9375rem;
   font-weight: 500;
   border: 1px solid var(--line);
+  transition: border-color var(--transition-fast), background-color var(--transition-smooth);
 }
 
 .avatar img {
@@ -146,7 +196,19 @@ body {
   border: 1px solid var(--line);
   border-radius: 6px;
   padding: 0.35rem;
-  box-shadow: 0 6px 20px rgba(38, 36, 32, 0.1);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.16);
+  animation: menu-in 160ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .account-menu .auth-action {
@@ -211,6 +273,8 @@ input[type="text"] {
   padding: 0.9rem 1rem;
   resize: vertical;
   line-height: 1.55;
+  transition: border-color var(--transition-fast), background-color var(--transition-smooth),
+    color var(--transition-smooth);
 }
 
 textarea:focus,
@@ -235,7 +299,7 @@ input::placeholder {
   padding: 0.7rem 1.25rem;
   cursor: pointer;
   border: 1px solid transparent;
-  transition: background-color 120ms ease, border-color 120ms ease;
+  transition: background-color 120ms ease, border-color 120ms ease, transform 120ms ease;
 }
 
 .btn:disabled {
@@ -243,9 +307,28 @@ input::placeholder {
   opacity: 0.45;
 }
 
+.btn:active:not(:disabled) {
+  transform: scale(0.96);
+}
+
 .btn-primary {
+  position: relative;
+  overflow: hidden;
   background: var(--accent);
   color: var(--paper);
+}
+
+.btn-primary::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.18), transparent);
+  transform: translateX(-120%);
+  transition: transform 550ms ease;
+}
+
+.btn-primary:hover::after {
+  transform: translateX(120%);
 }
 
 .btn-primary:not(:disabled):hover {
@@ -288,11 +371,14 @@ input::placeholder {
   border-radius: 999px;
   padding: 0.35rem 0.85rem;
   cursor: pointer;
+  transition: border-color var(--transition-fast), color var(--transition-fast),
+    transform var(--transition-fast);
 }
 
 .chip:hover {
   border-color: var(--ink-soft);
   color: var(--ink);
+  transform: translateY(-1px);
 }
 
 /* ---------- persona picker ---------- */
@@ -302,6 +388,10 @@ input::placeholder {
   flex-direction: column;
   border-top: 1px solid var(--line);
   margin-top: 1.5rem;
+}
+
+.persona-row {
+  transition: background-color var(--transition-fast);
 }
 
 .persona-row:hover:not(:disabled) {
@@ -387,21 +477,6 @@ input::placeholder {
   color: var(--ink);
 }
 
-@keyframes settle-in {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.turn-persona.turn-fresh {
-  animation: settle-in 420ms ease both;
-}
-
 .thinking {
   font-size: 0.9375rem;
   color: var(--ink-soft);
@@ -461,11 +536,31 @@ input::placeholder {
 }
 
 .flashcard {
+  cursor: pointer;
+  perspective: 1200px;
+}
+
+.flashcard-inner {
+  position: relative;
+  min-height: 5.5rem;
+  transform-style: preserve-3d;
+}
+
+.flashcard-face {
   border: 1px solid var(--line);
   border-radius: 6px;
   padding: 1.1rem 1.25rem;
-  cursor: pointer;
+  backface-visibility: hidden;
   background: var(--paper-raised);
+  transition: background-color var(--transition-smooth), border-color var(--transition-smooth);
+}
+
+.flashcard-face.back {
+  position: absolute;
+  inset: 0;
+  transform: rotateY(180deg);
+  background: var(--accent-soft);
+  border-color: var(--accent);
 }
 
 .flashcard-eyebrow {
@@ -478,11 +573,6 @@ input::placeholder {
   font-family: var(--serif);
   font-size: 1.0625rem;
   margin: 0;
-}
-
-.flashcard[data-flipped="true"] {
-  background: var(--accent-soft);
-  border-color: var(--accent);
 }
 
 /* ---------- misc ---------- */
@@ -526,6 +616,7 @@ input::placeholder {
   border-radius: 6px;
   padding: 1.1rem 1rem;
   text-align: center;
+  transition: background-color var(--transition-smooth), border-color var(--transition-smooth);
 }
 
 .stat-number {
@@ -553,6 +644,7 @@ input::placeholder {
   border: 1px solid var(--line);
   border-radius: 6px;
   padding: 1.1rem 1.25rem 0.5rem;
+  transition: background-color var(--transition-smooth), border-color var(--transition-smooth);
 }
 
 .chart-card h2 {
@@ -586,6 +678,7 @@ input::placeholder {
   cursor: pointer;
   font-family: var(--sans);
   color: var(--ink);
+  transition: background-color var(--transition-fast);
 }
 
 .history-row-header:hover {

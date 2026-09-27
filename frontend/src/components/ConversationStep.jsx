@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import gsap from "gsap";
 import { api } from "../api.js";
 
 const MAX_EXCHANGES = 3;
@@ -16,10 +17,24 @@ export default function ConversationStep({
   const [lastTurnId, setLastTurnId] = useState(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
+  const conversationRef = useRef(null);
 
   const exchangeCount = history.filter((h) => h.role === "user").length;
   const canFinish = exchangeCount >= 1;
   const reachedMax = exchangeCount >= MAX_EXCHANGES;
+
+  // Animate only the newest turn in, so replies feel like they settle into
+  // place rather than the whole thread jumping.
+  useEffect(() => {
+    if (!lastTurnId || !conversationRef.current) return;
+    const fresh = conversationRef.current.querySelector(".turn-fresh");
+    if (!fresh) return;
+    gsap.fromTo(
+      fresh,
+      { opacity: 0, y: 12 },
+      { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }
+    );
+  }, [lastTurnId]);
 
   async function submitExplanation() {
     const text = draft.trim();
@@ -79,7 +94,7 @@ export default function ConversationStep({
         — the follow-up question will find the soft spot.
       </p>
 
-      <div className="conversation">
+      <div className="conversation" ref={conversationRef}>
         {history.map((turn, i) => (
           <div
             key={i}

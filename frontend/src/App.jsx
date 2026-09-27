@@ -9,6 +9,13 @@ import RoleStep from "./components/RoleStep.jsx";
 import AccessStep from "./components/AccessStep.jsx";
 import GuardianDashboard from "./components/GuardianDashboard.jsx";
 import { api } from "./api.js";
+import { useSectionTransition } from "./useAnimations.js";
+
+function getInitialTheme() {
+  const stored = localStorage.getItem("sib-theme");
+  if (stored === "light" || stored === "dark") return stored;
+  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+}
 
 export default function App() {
   const {
@@ -27,9 +34,19 @@ export default function App() {
   const [streak, setStreak] = useState(null);
   const [account, setAccount] = useState(null); // { sub, email, role, roleSelected }
   const [menuOpen, setMenuOpen] = useState(false);
+  const [theme, setTheme] = useState(getInitialTheme);
   const accountRef = useRef(null);
 
   const getToken = useCallback(() => getAccessTokenSilently(), [getAccessTokenSilently]);
+
+  // Soft fade/lift whenever the visible step (or gate) changes, instead of
+  // a hard cut between screens.
+  const sectionRef = useSectionTransition([step, account?.roleSelected, account?.role, isAuthenticated]);
+
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
+    localStorage.setItem("sib-theme", theme);
+  }, [theme]);
 
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -74,137 +91,151 @@ export default function App() {
     <div className="app-shell">
       <header className="masthead">
         <span className="wordmark">Please help me study!</span>
-        {isLoading ? null : isAuthenticated ? (
-          <div className="account" ref={accountRef}>
-            <button
-              className="avatar-button"
-              onClick={() => setMenuOpen((o) => !o)}
-              aria-haspopup="true"
-              aria-expanded={menuOpen}
-              aria-label="Account menu"
-            >
-              <span className="avatar" title={user?.name || user?.email}>
-                {user?.picture ? <img src={user.picture} alt="" /> : initial}
-              </span>
-            </button>
 
-            {menuOpen && (
-              <div className="account-menu">
-                {account?.role === "student" && (
-                  <>
-                    <button
-                      className="auth-action"
-                      onClick={() => {
-                        setMenuOpen(false);
-                        onHistory ? restart() : setStep("history");
-                      }}
-                    >
-                      {onHistory ? "New session" : "History"}
-                    </button>
-                    <button
-                      className="auth-action"
-                      onClick={() => {
-                        setMenuOpen(false);
-                        setStep("access");
-                      }}
-                    >
-                      Access
-                    </button>
-                  </>
-                )}
-                <button
-                  className="auth-action"
-                  onClick={() => {
-                    setMenuOpen(false);
-                    logout({ logoutParams: { returnTo: window.location.origin } });
-                  }}
-                >
-                  Log out
-                </button>
-              </div>
-            )}
-          </div>
-        ) : (
-          <button className="auth-action" onClick={() => loginWithRedirect()}>
-            Log in
+        <div className="header-actions">
+          <button
+            className="theme-toggle"
+            onClick={() => setTheme((t) => (t === "dark" ? "light" : "dark"))}
+            aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+            title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+          >
+            {theme === "dark" ? "☀" : "☾"}
           </button>
-        )}
+
+          {isLoading ? null : isAuthenticated ? (
+            <div className="account" ref={accountRef}>
+              <button
+                className="avatar-button"
+                onClick={() => setMenuOpen((o) => !o)}
+                aria-haspopup="true"
+                aria-expanded={menuOpen}
+                aria-label="Account menu"
+              >
+                <span className="avatar" title={user?.name || user?.email}>
+                  {user?.picture ? <img src={user.picture} alt="" /> : initial}
+                </span>
+              </button>
+
+              {menuOpen && (
+                <div className="account-menu">
+                  {account?.role === "student" && (
+                    <>
+                      <button
+                        className="auth-action"
+                        onClick={() => {
+                          setMenuOpen(false);
+                          onHistory ? restart() : setStep("history");
+                        }}
+                      >
+                        {onHistory ? "New session" : "History"}
+                      </button>
+                      <button
+                        className="auth-action"
+                        onClick={() => {
+                          setMenuOpen(false);
+                          setStep("access");
+                        }}
+                      >
+                        Access
+                      </button>
+                    </>
+                  )}
+                  <button
+                    className="auth-action"
+                    onClick={() => {
+                      setMenuOpen(false);
+                      logout({ logoutParams: { returnTo: window.location.origin } });
+                    }}
+                  >
+                    Log out
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <button className="auth-action" onClick={() => loginWithRedirect()}>
+              Log in
+            </button>
+          )}
+        </div>
       </header>
 
-      {!isLoading && !isAuthenticated ? (
-        <section>
-          <h1>Find out what you don't actually know.</h1>
-          <p className="lede">
-            Explain a topic to a listener at the depth you choose. The
-            follow-up question it asks is exactly the thing you glossed over.
-          </p>
-          <div className="actions">
-            <button className="btn btn-primary" onClick={() => loginWithRedirect()}>
-              Log in to start
-            </button>
-          </div>
-        </section>
-      ) : (
-        <>
-          {!account ? null : !account.roleSelected ? (
-            <RoleStep
-              onSelect={async (role) => {
-                const token = await getToken();
-                await api.setRole(token, role);
-                setAccount((a) => ({ ...a, role, roleSelected: true }));
-              }}
-            />
-          ) : account.role !== "student" ? (
-            <GuardianDashboard getToken={getToken} />
-          ) : (
-            <>
-              {step === "topic" && (
-                <TopicStep
-                  onContinue={(t) => {
-                    setTopic(t);
-                    setStep("persona");
-                  }}
-                />
-              )}
+      <div ref={sectionRef}>
+        {!isLoading && !isAuthenticated ? (
+          <section>
+            <h1>Find out what you don't actually know.</h1>
+            <p className="lede">
+              Explain a topic to a listener at the depth you choose. The
+              follow-up question it asks is exactly the thing you glossed over.
+            </p>
+            <div className="actions">
+              <button className="btn btn-primary" onClick={() => loginWithRedirect()}>
+                Log in to start
+              </button>
+            </div>
+          </section>
+        ) : (
+          <>
+            {!account ? null : !account.roleSelected ? (
+              <RoleStep
+                onSelect={async (role) => {
+                  const token = await getToken();
+                  await api.setRole(token, role);
+                  setAccount((a) => ({ ...a, role, roleSelected: true }));
+                }}
+              />
+            ) : account.role !== "student" ? (
+              <GuardianDashboard getToken={getToken} />
+            ) : (
+              <>
+                {step === "topic" && (
+                  <TopicStep
+                    onContinue={(t) => {
+                      setTopic(t);
+                      setStep("persona");
+                    }}
+                  />
+                )}
 
-              {step === "persona" && (
-                <PersonaStep
-                  topic={topic}
-                  onSelect={(p) => {
-                    setPersona(p);
-                    setStep("conversation");
-                  }}
-                  onBack={() => setStep("topic")}
-                />
-              )}
+                {step === "persona" && (
+                  <PersonaStep
+                    topic={topic}
+                    onSelect={(p) => {
+                      setPersona(p);
+                      setStep("conversation");
+                    }}
+                    onBack={() => setStep("topic")}
+                  />
+                )}
 
-              {step === "conversation" && (
-                <ConversationStep
-                  topic={topic}
-                  persona={persona}
-                  getToken={getToken}
-                  onFinish={(result) => {
-                    setReport(result);
-                    setStreak(result.streak);
-                    setStep("report");
-                  }}
-                  onBack={() => setStep("persona")}
-                />
-              )}
+                {step === "conversation" && (
+                  <ConversationStep
+                    topic={topic}
+                    persona={persona}
+                    getToken={getToken}
+                    onFinish={(result) => {
+                      setReport(result);
+                      setStreak(result.streak);
+                      setStep("report");
+                    }}
+                    onBack={() => setStep("persona")}
+                  />
+                )}
 
-              {step === "report" && (
-                <ReportStep topic={topic} report={report} streak={streak} onRestart={restart} />
-              )}
+                {step === "report" && (
+                  <ReportStep topic={topic} report={report} streak={streak} onRestart={restart} />
+                )}
 
-              {step === "history" && <HistoryStep getToken={getToken} onStartNew={restart} />}
+                {step === "history" && <HistoryStep getToken={getToken} onStartNew={restart} />}
 
-              {step === "access" && (
-                <AccessStep getToken={getToken} onBack={() => setStep("topic")} />
-              )}
-            </>
-          )}
-        </>
-      )}
+                {step === "access" && (
+                  <AccessStep getToken={getToken} onBack={() => setStep("topic")} />
+                )}
+              </>
+            )}
+          </>
+        )}
+      </div>
     </div>
   );
 }
